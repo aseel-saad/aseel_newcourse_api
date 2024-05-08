@@ -1,12 +1,12 @@
 package aseel.api.service;
 
+import aseel.api.exceptions.ResourceNotFoundException;
 import aseel.api.model.Expense;
 import aseel.api.repository.ExpenseRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.sql.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -16,8 +16,8 @@ public class ExpenseServiceImpl implements ExpenseService{
     @Autowired
     ExpenseRepository expenseRepo;
     @Override
-    public Page<Expense> getAllExpenses(Pageable page) {
-        return expenseRepo.findAll(page);
+    public List<Expense> getAllExpenses() {
+        return expenseRepo.findAll();
     }
 
     @Override
@@ -26,12 +26,13 @@ public class ExpenseServiceImpl implements ExpenseService{
         if(expense.isPresent()){
             return expense.get();
         }
-        throw new RuntimeException("Expense is not found for the id " + id);
+        throw new ResourceNotFoundException("Expense is not found for the id " + id);
     }
 
     @Override
     public void deleteExpenseById(Long id) {
-        expenseRepo.deleteById(id);
+        Expense expense = getExpenseById(id);
+        expenseRepo.delete(expense);
     }
 
     @Override
@@ -49,4 +50,32 @@ public class ExpenseServiceImpl implements ExpenseService{
         existingExpense.setDescription(expense.getDescription() != null ? expense.getDescription() : existingExpense.getDescription());
         return expenseRepo.save(existingExpense);
     }
+
+    @Override
+    public List<Expense> readByCategory(String category) {
+        return expenseRepo.findByCategory(category);
+    }
+
+    @Override
+    public List<Expense> readByName(String keyword) {
+        return expenseRepo.findByNameContaining(keyword);
+    }
+
+    @Override
+    public List<Expense> readByDate(Date startDate, Date endDate) {
+        if(startDate == null)
+        {
+            startDate = new Date(0);
+            System.out.println("start " +startDate);
+        }
+
+        if(endDate == null)
+        {
+            endDate = new Date(System.currentTimeMillis());
+            System.out.println("end "+endDate);
+        }
+        return expenseRepo.findByDateBetween(startDate,endDate);
+    }
+
+
 }

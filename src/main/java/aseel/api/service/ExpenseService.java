@@ -4,11 +4,12 @@ import aseel.api.model.Expense;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.sql.Date;
 import java.util.List;
 
 public interface ExpenseService {
 
-    Page<Expense> getAllExpenses(Pageable page);
+    List<Expense> getAllExpenses();
 
     Expense getExpenseById(Long id);
 
@@ -17,5 +18,11 @@ public interface ExpenseService {
     Expense saveExpenseDetails(Expense expense);
 
     Expense updateExpenseDetails(Long id , Expense expense);
+
+    List<Expense> readByCategory(String category);
+
+    List<Expense> readByName(String keyword);
+
+    List<Expense> readByDate(Date startDate, Date endDate);
 
 }
