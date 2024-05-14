@@ -8,10 +8,17 @@ import aseel.api.model.UserModel;
 import aseel.api.repository.UserRepository;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
 public class UserServiceImpl implements UserService{
+
+    @Autowired
+    private PasswordEncoder bcryptEncoder;
 
     @Autowired
     private UserRepository userRepository;
@@ -23,6 +30,7 @@ public class UserServiceImpl implements UserService{
 //        }
         User newUser = new User();
         BeanUtils.copyProperties(user,newUser);
+        newUser.setPassword(bcryptEncoder.encode(newUser.getPassword()));
         return userRepository.save(newUser);
     }
 
@@ -36,7 +44,7 @@ public class UserServiceImpl implements UserService{
         User existingUser = readUser(id);
         existingUser.setName(user.getName() != null ? user.getName() : existingUser.getName());
         existingUser.setEmail(user.getEmail() != null ? user.getEmail() : existingUser.getEmail());
-        existingUser.setPassword(user.getPassword() != null ? user.getPassword() : existingUser.getPassword());
+        existingUser.setPassword(user.getPassword() != null ? bcryptEncoder.encode(user.getPassword()) : existingUser.getPassword());
         existingUser.setAge(user.getAge() != null ? user.getAge() : existingUser.getAge());
         return userRepository.save(existingUser);
     }
@@ -45,5 +53,12 @@ public class UserServiceImpl implements UserService{
     public void deleteUser(Long id) {
         User existingUser = readUser(id);
         userRepository.delete(existingUser);
+    }
+
+    @Override
+    public User getLoggedInUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
+        return userRepository.findByEmail(email).orElseThrow(() -> new UsernameNotFoundException("User not found or the email: " + email));
     }
 }

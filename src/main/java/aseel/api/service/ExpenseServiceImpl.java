@@ -3,6 +3,7 @@ package aseel.api.service;
 import aseel.api.exceptions.ResourceNotFoundException;
 import aseel.api.model.Expense;
 import aseel.api.repository.ExpenseRepository;
+import aseel.api.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -14,7 +15,10 @@ import java.util.Optional;
 public class ExpenseServiceImpl implements ExpenseService{
 
     @Autowired
-    ExpenseRepository expenseRepo;
+    private ExpenseRepository expenseRepo;
+
+    @Autowired
+    private UserService userService;
     @Override
     public List<Expense> getAllExpenses() {
         return expenseRepo.findAll();
@@ -37,6 +41,7 @@ public class ExpenseServiceImpl implements ExpenseService{
 
     @Override
     public Expense saveExpenseDetails(Expense expense) {
+        expense.setUser(userService.getLoggedInUser());
         return expenseRepo.save(expense);
     }
 

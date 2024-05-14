@@ -15,7 +15,7 @@ public class UserController {
     @Autowired
     private UserService userService;
 
-    @PostMapping("/register")
+    @PostMapping("/users/register")
     public ResponseEntity<User> save(@Valid @RequestBody UserModel user){
         return new ResponseEntity<User>(userService.createUser(user), HttpStatus.CREATED);
     }
