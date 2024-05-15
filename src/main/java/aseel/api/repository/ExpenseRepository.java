@@ -6,14 +6,19 @@ import org.springframework.stereotype.Repository;
 
 import java.sql.Date;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface ExpenseRepository extends JpaRepository<Expense, Long> {
 
-    List<Expense> findByCategory(String category);
+    List<Expense> findByUserIdAndCategory(Long userId, String category);
 
-    List<Expense> findByNameContaining(String keyword);
+    List<Expense> findByUserIdAndNameContaining(Long userId,String keyword);
 
-    List<Expense> findByDateBetween(Date startDate, Date endDate);
+    List<Expense> findByUserIdAndDateBetween(Long userId,Date startDate, Date endDate);
+
+    List<Expense> findByUserId(Long userId);
+
+    Optional<Expense> findByUserIdAndId(Long userId, Long expenseId);
 
 }

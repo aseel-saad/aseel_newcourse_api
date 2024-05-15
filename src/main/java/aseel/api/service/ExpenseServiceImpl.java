@@ -21,12 +21,12 @@ public class ExpenseServiceImpl implements ExpenseService{
     private UserService userService;
     @Override
     public List<Expense> getAllExpenses() {
-        return expenseRepo.findAll();
+        return expenseRepo.findByUserId(userService.getLoggedInUser().getId());
     }
 
     @Override
     public Expense getExpenseById(Long id) {
-        Optional<Expense> expense = expenseRepo.findById(id);
+        Optional<Expense> expense = expenseRepo.findByUserIdAndId(userService.getLoggedInUser().getId(),id);
         if(expense.isPresent()){
             return expense.get();
         }
@@ -58,12 +58,12 @@ public class ExpenseServiceImpl implements ExpenseService{
 
     @Override
     public List<Expense> readByCategory(String category) {
-        return expenseRepo.findByCategory(category);
+        return expenseRepo.findByUserIdAndCategory(userService.getLoggedInUser().getId(),category);
     }
 
     @Override
     public List<Expense> readByName(String keyword) {
-        return expenseRepo.findByNameContaining(keyword);
+        return expenseRepo.findByUserIdAndNameContaining(userService.getLoggedInUser().getId(),keyword);
     }
 
     @Override
@@ -79,7 +79,7 @@ public class ExpenseServiceImpl implements ExpenseService{
             endDate = new Date(System.currentTimeMillis());
             System.out.println("end "+endDate);
         }
-        return expenseRepo.findByDateBetween(startDate,endDate);
+        return expenseRepo.findByUserIdAndDateBetween(userService.getLoggedInUser().getId(),startDate,endDate);
     }
 
 

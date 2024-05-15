@@ -24,10 +24,10 @@ public class UserServiceImpl implements UserService{
     private UserRepository userRepository;
     @Override
     public User createUser(UserModel user) {
-//        if(userRepository.existsByEmail(user.getEmail()))
-//        {
-//            throw new ItemAlreadyExistsException("User is already register with email: "+ user.getEmail());
-//        }
+        if(userRepository.findByEmail(user.getEmail()).isPresent())
+        {
+            throw new ItemAlreadyExistsException("User is already register with email: "+ user.getEmail());
+        }
         User newUser = new User();
         BeanUtils.copyProperties(user,newUser);
         newUser.setPassword(bcryptEncoder.encode(newUser.getPassword()));
@@ -35,13 +35,14 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
-    public User readUser(Long id) throws ResourceNotFoundException {
-        return userRepository.findById(id).orElseThrow(()->new ResourceNotFoundException("User not found for the id: " + id));
+    public User readUser() throws ResourceNotFoundException {
+        Long userId = getLoggedInUser().getId();
+        return userRepository.findById(userId).orElseThrow(()->new ResourceNotFoundException("User not found for the id: " + userId));
     }
 
     @Override
-    public User updateUser(UserModel user, Long id) {
-        User existingUser = readUser(id);
+    public User updateUser(UserModel user) {
+        User existingUser = readUser();
         existingUser.setName(user.getName() != null ? user.getName() : existingUser.getName());
         existingUser.setEmail(user.getEmail() != null ? user.getEmail() : existingUser.getEmail());
         existingUser.setPassword(user.getPassword() != null ? bcryptEncoder.encode(user.getPassword()) : existingUser.getPassword());
@@ -50,8 +51,8 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
-    public void deleteUser(Long id) {
-        User existingUser = readUser(id);
+    public void deleteUser() {
+        User existingUser = readUser();
         userRepository.delete(existingUser);
     }
 
